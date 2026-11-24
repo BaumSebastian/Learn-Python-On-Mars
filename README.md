@@ -2,7 +2,9 @@
 
 **A browser-based way to teach Python to beginners, free for schools and all other non-commercial use: students write real Python and steer a rover across Mars.**
 
-No installation, no accounts, no internet. Download the folder, open `index.html`, start teaching.
+**[▶ Try it online](https://baumsebastian.github.io/Learn-Python-On-Mars/)** — nothing to download, it runs in your browser.
+
+For the classroom there is also an offline version: no installation, no accounts, no internet. Download the folder, open `index.html`, start teaching.
 
 ![The interface: mission text and editor on the left, the Mars map on the right](docs/images/overview.png)
 
@@ -57,6 +59,8 @@ Here the rover runs a fixed program that students can read but not change. Their
 ![The thermal camera shows a temperature for every field](docs/images/thermal.png)
 
 ## Get started
+
+The quickest way is the [online version](https://baumsebastian.github.io/Learn-Python-On-Mars/). To run it offline, for example in a classroom without internet:
 
 1. Download this project: on GitHub, click **Code** and then **Download ZIP**.
 2. Unpack the ZIP. The page does not work from inside the ZIP.
