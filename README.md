@@ -103,6 +103,27 @@ Everything is plain HTML, CSS and JavaScript. There is no build step: change a f
 
 A new mission is one entry in `js/levels.js`: a small text map, a few sentences and a star limit.
 
+## Contributing
+
+Ideas, fixes and new missions are welcome.
+
+- **Have an idea or found a problem?** Open an issue and describe it. For a bug, say which mission, which browser, and what you typed.
+- **Want to add something yourself?** Send a pull request. For anything larger than a small fix, open an issue first so we can agree on the direction before you put in the work.
+
+Good first contributions:
+
+- **A new mission.** Add one entry to `js/levels.js` with the map and the texts, and a sample solution to `teacher/solutions.js`.
+- **A translation.** The texts are in `js/i18n.js` and `js/levels.js`, each with an `en` and a `de` version next to each other.
+- **A fix** for a confusing message, a typo or a mission that can be solved in an unintended way.
+
+Before you send a pull request:
+
+1. Open `index.html?teacher`, go to your mission and click **Solution**: the sample solution must finish the mission. If the field is random, run it several times.
+2. Write every text in English and German. If you only speak one of them, say so in the pull request and someone will add the other.
+3. Keep it dependency-free: no build step and no files loaded from the internet, so it keeps working offline.
+
+By contributing you agree that your contribution is published under the same licence as the project.
+
 ## How it is built
 
 - **[Skulpt](https://skulpt.org/)** runs Python in the browser.
