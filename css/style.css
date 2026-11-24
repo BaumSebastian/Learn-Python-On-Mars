@@ -276,6 +276,14 @@ li.CodeMirror-hint-active .hint-desc { color: #4a2410; }
 }
 
 @media (max-width: 900px) {
+  /* narrow screens: the top bar wraps, and the missions get a row of their own */
+  .topbar { flex-wrap: wrap; gap: 8px 10px; }
+  .brand { flex: 1 1 auto; min-width: 0; white-space: normal; }
+  .level-nav { order: 10; flex: 1 0 100%; justify-content: flex-start; }
+  .lang-toggle { margin-left: auto; }
+  .hud { flex-wrap: wrap; gap: 6px 16px; }
+  .hud-note { margin-left: 0; text-align: left; }
+
   body { overflow: auto; }
   .layout { flex-direction: column; }
   .pane-left, .layout.dual .pane-left { flex: 0 0 auto; }
