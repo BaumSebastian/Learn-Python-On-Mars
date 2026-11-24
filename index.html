@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Learn Python on Mars</title>
+  <link rel="stylesheet" href="vendor/codemirror/codemirror.css">
+  <link rel="stylesheet" href="vendor/codemirror/show-hint.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <img class="brand-logo" id="brandLogo" alt="" hidden>
+      <span id="appTitle">Learn Python on Mars</span>
+    </div>
+    <div class="track-toggle" role="group" aria-label="Track">
+      <button type="button" data-track="rover" id="trackRover"></button>
+      <button type="button" data-track="heli" id="trackHeli"></button>
+    </div>
+    <nav id="levelNav" class="level-nav" aria-label="Missions"></nav>
+    <button type="button" id="btnResetAll" class="btn btn-ghost btn-small"></button>
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button type="button" data-lang="en">EN</button>
+      <button type="button" data-lang="de">DE</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="pane pane-left">
+      <div class="task">
+        <div class="task-head">
+          <span class="task-num" id="taskNum"></span>
+          <h1 id="taskTitle"></h1>
+          <span class="task-stars" id="taskStars"></span>
+        </div>
+        <div class="task-story" id="taskStory"></div>
+        <div class="concept" id="taskConcept"></div>
+        <details class="hint" id="taskHint">
+          <summary id="taskHintLabel"></summary>
+          <div id="taskHintBody"></div>
+        </details>
+      </div>
+
+      <div class="toolbar">
+        <button type="button" id="btnRun" class="btn btn-primary"></button>
+        <button type="button" id="btnStep" class="btn"></button>
+        <button type="button" id="btnStop" class="btn"></button>
+        <button type="button" id="btnReset" class="btn"></button>
+        <label class="speed"><span id="lblSpeed"></span>
+          <input type="range" id="speed" min="1" max="5" step="1" value="3">
+        </label>
+      </div>
+
+      <div class="editors" id="editors">
+        <div class="editor-wrap">
+          <div class="editor-label" id="lblYourCode"></div>
+          <textarea id="code" spellcheck="false"></textarea>
+          <div class="editor-actions">
+            <button type="button" id="btnSolution" class="btn btn-ghost" hidden></button>
+            <button type="button" id="btnResetCode" class="btn btn-ghost"></button>
+          </div>
+        </div>
+        <div class="editor-wrap editor-rover" id="roverPanel" hidden>
+          <div class="editor-label" id="lblRoverCode"></div>
+          <textarea id="roverCode" spellcheck="false"></textarea>
+        </div>
+      </div>
+
+      <div class="console">
+        <div class="console-head" id="lblOutput"></div>
+        <div class="console-body" id="console" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="pane pane-right">
+      <div class="hud">
+        <div class="hud-item" id="hudItemCrystals"><span class="hud-label" id="lblCrystals"></span><span class="hud-value" id="hudCrystals">0 / 0</span></div>
+        <div class="hud-item" id="hudItemBattery" hidden><span class="hud-label" id="lblBattery"></span><span class="hud-value" id="hudBattery">0</span></div>
+        <div class="hud-item"><span class="hud-label" id="lblSteps"></span><span class="hud-value" id="hudSteps">0</span></div>
+        <div class="hud-item"><span class="hud-label" id="lblLines"></span><span class="hud-value" id="hudLines">0</span></div>
+        <div class="hud-note" id="hudNote"></div>
+      </div>
+
+      <div class="stage" id="stage">
+        <canvas id="game"></canvas>
+        <div class="overlay" id="overlay" hidden>
+          <div class="overlay-card">
+            <h2 id="ovTitle"></h2>
+            <div class="overlay-stars" id="ovStars"></div>
+            <p id="ovLines"></p>
+            <p id="ovInfo"></p>
+            <div class="overlay-actions">
+              <button type="button" id="ovNext" class="btn btn-primary"></button>
+              <button type="button" id="ovStay" class="btn"></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="reference">
+        <div class="reference-head"><span id="lblCommands"></span><span class="reference-help" id="lblCommandsHelp"></span></div>
+        <div class="commands" id="commands"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="vendor/skulpt/skulpt.min.js"></script>
+  <script src="vendor/skulpt/skulpt-stdlib.js"></script>
+  <script src="vendor/codemirror/codemirror.js"></script>
+  <script src="vendor/codemirror/python.js"></script>
+  <script src="vendor/codemirror/show-hint.js"></script>
+  <script src="vendor/codemirror/matchbrackets.js"></script>
+  <script src="vendor/codemirror/closebrackets.js"></script>
+  <script src="vendor/codemirror/active-line.js"></script>
+  <script src="vendor/codemirror/comment.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/levels.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/runner.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
