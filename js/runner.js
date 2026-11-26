@@ -13,8 +13,9 @@
     'is_sample', 'scan', 'can_move_right', 'can_move_left', 'can_move_up', 'can_move_down',
     'wait_for_part', 'wait_for_beacon', 'wait_for_beacons', 'beacon_x', 'beacon_y', 'receive', 'drive_to'];
   var HELI_COMMANDS = ['fly_right', 'fly_left', 'fly_up', 'fly_down', 'drop', 'mark', 'take_photo', 'take_thermal', 'battery', 'send'];
-  var SHARED_COMMANDS = ['get_x', 'get_y', 'wait', 'get_plan'];
-  var COMMANDS = ROVER_COMMANDS.concat(HELI_COMMANDS, SHARED_COMMANDS);
+  var SHARED_COMMANDS = ['get_x', 'get_y', 'wait', 'get_plan', 'get_order'];
+  var BONUS_COMMANDS = ['distance', 'read', 'unlock']; // rover commands of the bonus missions
+  var COMMANDS = ROVER_COMMANDS.concat(BONUS_COMMANDS, HELI_COMMANDS, SHARED_COMMANDS);
   var ORDER = ['rover', 'heli']; // within a tick the rover acts first, then the helicopter
 
   function builtinRead(file) {
@@ -213,6 +214,13 @@
       return bool(game.scan() === kind);
     });
     define('scan', 'rover', 0, 0, function () { return new Sk.builtin.str(game.scan()); });
+    // bonus missions: a sensor that answers with a number, letters on the ground, a gate with a code word
+    define('distance', 'rover', 0, 0, function () { return new Sk.builtin.int_(game.distance()); });
+    define('read', 'rover', 0, 0, function () { return new Sk.builtin.str(game.readLetter()); });
+    define('unlock', 'rover', 1, 1, function (pyCode) {
+      var code = String(Sk.ffi.remapToJs(pyCode));
+      return self._action('rover', function () { game.unlock(code); });
+    });
 
     // for both vehicles: they answer for whichever program is asking
     define('get_x', null, 0, 0, function () { return new Sk.builtin.int_(position(self.current).x); });
@@ -222,6 +230,7 @@
     });
     // every caller gets its own copy, so one program cannot change the other's plan
     define('get_plan', null, 0, 0, function () { return Sk.ffi.remapToPy(game.world.plan.slice()); });
+    define('get_order', null, 0, 0, function () { return new Sk.builtin.str(game.world.order); });
 
     // helicopter
     define('drop', 'heli', 0, 0, function () {
@@ -231,7 +240,10 @@
       return self._action('heli', function () { game.heliMark(); });
     });
     define('take_photo', 'heli', 0, 0, function () {
-      if (game.world.noPhoto) throw new window.GameError('photoBlocked');
+      // noPhoto: true, or the name of the message that says why there is no photo
+      if (game.world.noPhoto) {
+        throw new window.GameError(typeof game.world.noPhoto === 'string' ? game.world.noPhoto : 'photoBlocked');
+      }
       return Sk.ffi.remapToPy(game.photo());
     });
     define('take_thermal', 'heli', 0, 0, function () {

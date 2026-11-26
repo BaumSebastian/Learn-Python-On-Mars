@@ -29,6 +29,9 @@
     return (window.performance && performance.now) ? performance.now() : Date.now();
   }
 
+  /* What the rover is meant to collect, as scan() names it. */
+  var WANTED = 'ice';
+
   function Game(canvas, stage) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
@@ -66,6 +69,9 @@
   Game.prototype.load = function (rows, opts) {
     opts = opts || {};
     var cols = 0, y, x;
+    // Bonus missions: ? is a plate with a letter (taken from opts.letters in reading order), G is a gate
+    // that unlock() opens with opts.code (by default the letters), opts.order is the text for get_order().
+    var letters = opts.letters || '', letterCount = 0;
     for (y = 0; y < rows.length; y++) cols = Math.max(cols, rows[y].length);
     var w = {
       cols: cols, rows: rows.length, cells: [],
@@ -74,8 +80,9 @@
       goal: opts.goal || 'collect', hidden: !!opts.hidden, dropMustHit: !!opts.dropMustHit,
       heli: null, part: null, delivered: false, beacons: [], beaconLimit: opts.beacons || 1,
       plan: opts.plan || [], info: opts.info || {}, message: null, ticks: 0,
-      heat: opts.heat || null, heatShown: false, noPhoto: !!opts.noPhoto,
-      photoRadius: opts.photoRadius || 0, seen: {}
+      heat: opts.heat || null, heatShown: false, noPhoto: opts.noPhoto || false,
+      photoRadius: opts.photoRadius || 0, seen: {},
+      order: opts.order || '', code: opts.code || letters, hasGate: false, gateOpen: false
     };
     for (y = 0; y < rows.length; y++) {
       var line = [];
@@ -90,6 +97,8 @@
           var capacity = opts.battery || 10;
           w.heli = { x: x, y: y, battery: capacity, capacity: capacity, carrying: !!opts.part };
         }
+        if (ch === '?') cell.letter = letters.charAt(letterCount++) || '?';
+        if (ch === 'G') { cell.gate = true; w.hasGate = true; }
         line.push(cell);
       }
       w.cells.push(line);
@@ -119,7 +128,8 @@
 
   Game.prototype._free = function (x, y) {
     var w = this.world;
-    return x >= 0 && y >= 0 && x < w.cols && y < w.rows && !w.cells[y][x].rock;
+    if (x < 0 || y < 0 || x >= w.cols || y >= w.rows || w.cells[y][x].rock) return false;
+    return !(w.cells[y][x].gate && !w.gateOpen);
   };
 
   Game.prototype.canMove = function (dir) {
@@ -135,6 +145,37 @@
   Game.prototype.scan = function () {
     var r = this.world.rover;
     return this.world.cells[r.y][r.x].sample || 'nothing';
+  };
+
+  /* How many fields to the right of the rover the next thing to collect lies: 0 if the rover is on it, -1 if there is none. */
+  Game.prototype.distance = function () {
+    var w = this.world, r = w.rover;
+    for (var x = r.x; x < w.cols; x++) {
+      if (w.cells[r.y][x].sample === WANTED) return x - r.x;
+    }
+    return -1;
+  };
+
+  /* The letter on the plate under the rover, or an empty text. */
+  Game.prototype.readLetter = function () {
+    var r = this.world.rover;
+    return this.world.cells[r.y][r.x].letter || '';
+  };
+
+  /* Opens the gate if the code word is right. */
+  Game.prototype.unlock = function (code) {
+    var w = this.world, x, y;
+    if (w.crashed) throw new GameError('broken');
+    if (!w.hasGate) throw new GameError('noGate');
+    if (code !== w.code) throw new GameError('wrongCode', { code: code });
+    if (w.gateOpen) return;
+    w.gateOpen = true;
+    for (y = 0; y < w.rows; y++) {
+      for (x = 0; x < w.cols; x++) {
+        if (w.cells[y][x].gate) this.effects.push({ type: 'ring', x: x, y: y, t0: now(), dur: 700 });
+      }
+    }
+    this.requestRender();
   };
 
   Game.prototype._crash = function (key, dir, who, vars) {
@@ -254,6 +295,7 @@
     if (!this._free(nx, ny)) {
       var inside = nx >= 0 && ny >= 0 && nx < w.cols && ny < w.rows;
       this.view.angle = from.angle + turn;
+      if (inside && w.cells[ny][nx].gate) this._crash('crashGate', dir);
       this._crash(inside ? 'crashRock' : 'crashEdge', dir);
     }
     r.x = nx; r.y = ny;
@@ -389,6 +431,14 @@
       ctx.stroke();
     }
 
+    // letter plates and the gate (bonus missions)
+    for (y = 0; y < w.rows; y++) {
+      for (x = 0; x < w.cols; x++) {
+        if (w.cells[y][x].letter) drawPlate(ctx, x * s + s / 2, y * s + s / 2, s, w.cells[y][x].letter);
+        if (w.cells[y][x].gate) drawGate(ctx, x * s + s / 2, y * s + s / 2, s, w.gateOpen);
+      }
+    }
+
     // rocks and samples
     for (y = 0; y < w.rows; y++) {
       for (x = 0; x < w.cols; x++) {
@@ -470,6 +520,42 @@
   };
 
   /* ---------- drawing helpers ---------- */
+
+  /* A plate on the ground with one letter of the code word. */
+  function drawPlate(ctx, cx, cy, s, letter) {
+    var w = s * 0.6;
+    roundRect(ctx, cx - w / 2, cy - w / 2, w, w, s * 0.07);
+    ctx.fillStyle = '#f2c230';
+    ctx.fill();
+    ctx.strokeStyle = '#2b2410';
+    ctx.lineWidth = Math.max(1.5, s * 0.035);
+    ctx.stroke();
+    ctx.fillStyle = '#1d1808';
+    ctx.font = 'bold ' + Math.round(s * 0.4) + 'px Consolas, Menlo, monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(letter, cx, cy + s * 0.02);
+  }
+
+  /* The gate: two posts with a red and white barrier between them. An open gate has no barrier and green lights. */
+  function drawGate(ctx, cx, cy, s, open) {
+    var top = cy - s * 0.42, height = s * 0.84, width = s * 0.14, parts = 6, i;
+    if (!open) {
+      for (i = 0; i < parts; i++) {
+        ctx.fillStyle = (i % 2 === 0) ? '#e03a2f' : '#f4f4f4';
+        ctx.fillRect(cx - width / 2, top + i * height / parts, width, height / parts);
+      }
+      ctx.strokeStyle = '#3a1512';
+      ctx.lineWidth = Math.max(1, s * 0.02);
+      ctx.strokeRect(cx - width / 2, top, width, height);
+    }
+    for (i = -1; i <= 1; i += 2) {
+      ctx.fillStyle = '#2b2d36';
+      ctx.beginPath(); ctx.arc(cx, cy + i * s * 0.42, s * 0.09, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = open ? '#3ddc84' : '#ff4634';
+      ctx.beginPath(); ctx.arc(cx, cy + i * s * 0.42, s * 0.04, 0, Math.PI * 2); ctx.fill();
+    }
+  }
 
   function roundRect(ctx, x, y, w, h, r) {
     ctx.beginPath();

@@ -1,6 +1,21 @@
 /* Sample solutions (three stars each). Only loaded when the page is opened as index.html?teacher
  * Delete this folder on the student PCs if you do not want the solutions to be there. */
 window.SOLUTIONS = {
+  'how-far':
+    'for k in range(3):\n    n = distance()\n    for i in range(n):\n        move_right()\n    collect()\n',
+
+  'code-word':
+    'code = ""\nfor i in range(5):\n    move_right()\n    code = code + read()\nunlock(code)\nmove_right()\nmove_right()\ncollect()\n',
+
+  'right-or-down':
+    'for i in range(10):\n    if can_move_right():\n        move_right()\n    else:\n        move_down()\ncollect()\n',
+
+  'heli-order':
+    'order = get_order()\nfor i in range(0, len(order), 2):\n    n = int(order[i])\n    for k in range(n):\n        if order[i + 1] == "R":\n            fly_right()\n        else:\n            fly_down()\nmark()\n',
+
+  'heli-bugs':
+    'def fly_to(x, y):\n    while get_x() < x:\n        fly_right()\n    while get_x() > x:\n        fly_left()\n    while get_y() < y:\n        fly_down()\n    while get_y() > y:\n        fly_up()\n\nphoto = take_photo()\ntargets = []\nfor y in range(len(photo)):\n    for x in range(len(photo[y])):\n        if photo[y][x] == "ice":\n            targets.append([x, y])\n\nfor t in targets:\n    fly_to(t[0], t[1])\n    mark()\n',
+
   'first-contact':
     'move_right()\nmove_right()\nmove_right()\ncollect()\n',
 

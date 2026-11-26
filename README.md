@@ -17,7 +17,7 @@ For the classroom there is also an offline version: no installation, no accounts
 - **English and German.** One click switches every text; the Python stays the same.
 - **Room for everyone.** Beginners solve missions step by step, stars reward shorter programs, and a second track challenges students who already program.
 
-## Two tracks, 23 missions
+## Two tracks, 28 missions
 
 ### Rover track: the basics
 
@@ -39,6 +39,14 @@ Fifteen short missions, each adding one idea. Designed for about three hours wit
 
 From mission 8 on the field changes on every run, so a route cannot simply be written down once.
 
+Three **bonus missions** sit between them for students who are faster than the rest. They are optional: **Next mission** skips them, and they have their own numbers in the mission bar.
+
+| # | Mission | New idea |
+|---|---------|----------|
+| B1 | How far? | A command that answers with a value, and a variable to keep it: `n = distance()` |
+| B2 | The code word | Strings: joining letters with `+` |
+| B3 | Right or down? | `else` |
+
 ### Helicopter track: for students who already program
 
 Here the rover runs a fixed program that students can read but not change. Their own program flies a helicopter, and both run in step. The focus shifts from writing commands to **reading code, working with data and optimising**.
@@ -55,6 +63,8 @@ Here the rover runs a fixed program that students can read but not change. Their
 | H6 | Thermal image | Searching a grid of numbers for its minimum |
 | H7 | Short on battery | Reading a given program and optimising it |
 | H8 | Piece by piece | Merging six small photos into one map by shifting indexes |
+| H9 | Coded order | Strings as data: indexes, `int()` and a loop in steps of two |
+| H10 | Bug hunt | Debugging a given program with three bugs of three different kinds |
 
 ![The thermal camera shows a temperature for every field](docs/images/thermal.png)
 

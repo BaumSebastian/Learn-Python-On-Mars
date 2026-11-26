@@ -4,6 +4,8 @@
  * build(rnd) returns the rows of the map; rnd() gives a random number 0..1.
  * stars: [most lines for 3 stars, most lines for 2 stars]
  * api: commands that appear in the command list from this mission on.
+ * bonus: true marks an optional mission. It gets its own number (B1, B2 ...) and "Next mission" skips it.
+ * Bonus missions use two more map characters:  ? plate with a letter   G gate
  */
 (function () {
   'use strict';
@@ -34,6 +36,16 @@
   }
 
   window.COMMAND_DOCS = {
+    distance: { text: 'distance()', en: 'How many fields to the right the next crystal is', de: 'Wie viele Felder rechts der nächste Kristall liegt' },
+    var_assign: { text: 'n = distance()', en: 'Keep the answer in a variable called n', de: 'Die Antwort in einer Variablen namens n merken' },
+    read_letter: { text: 'read()', en: 'The letter on the rover\'s field, as a string', de: 'Der Buchstabe auf dem Feld des Rovers, als String' },
+    str_plus: { text: 'code = code + read()', en: 'Add a letter at the end of a string', de: 'Einen Buchstaben ans Ende eines Strings anhängen' },
+    unlock: { text: 'unlock(code)', en: 'Open the gate with the code word', de: 'Das Tor mit dem Codewort öffnen' },
+    else_stmt: { text: 'else:', en: 'After an if: run these lines when the answer is False', de: 'Nach einem if: diese Zeilen ausführen, wenn die Antwort False ist' },
+    get_order: { text: 'order = get_order()', en: 'The order of this run as a string, for example "3R2D"', de: 'Der Auftrag dieses Starts als String, zum Beispiel "3R2D"' },
+    str_index: { text: 'order[0]', en: 'The first character of a string; len(order) is its length', de: 'Das erste Zeichen eines Strings; len(order) ist seine Länge' },
+    int_doc: { text: 'int("3")', en: 'Turn the text "3" into the number 3', de: 'Aus dem Text "3" die Zahl 3 machen' },
+    range_step: { text: 'range(0, 8, 2)', en: 'Count in steps of two: 0, 2, 4, 6', de: 'In Zweierschritten zählen: 0, 2, 4, 6' },
     move_right: { text: 'move_right()', en: 'Drive one field to the right', de: 'Ein Feld nach rechts fahren' },
     move_left: { text: 'move_left()', en: 'Drive one field to the left', de: 'Ein Feld nach links fahren' },
     move_up: { text: 'move_up()', en: 'Drive one field up', de: 'Ein Feld nach oben fahren' },
@@ -260,6 +272,79 @@
       ])
     },
     {
+      id: 'how-far',
+      bonus: true,
+      title: { en: 'How far?', de: 'Wie weit?' },
+      story: {
+        en: '<p>Three crystals lie in this row, in different places on every run. Counting fields on the map does not help any more. But the rover has a radar: <code>distance()</code> answers with a number, the number of fields to the next crystal on its right.</p><p><b>Mission:</b> Collect all three crystals. Ask the radar how far to drive, and keep the answer in a variable.</p>',
+        de: '<p>In dieser Reihe liegen drei Kristalle, bei jedem Start an anderen Stellen. Felder auf der Karte abzuzählen hilft nicht mehr. Aber der Rover hat ein Radar: <code>distance()</code> antwortet mit einer Zahl, nämlich der Anzahl der Felder bis zum nächsten Kristall rechts von ihm.</p><p><b>Mission:</b> Sammle alle drei Kristalle ein. Frage das Radar, wie weit du fahren musst, und merke dir die Antwort in einer Variablen.</p>'
+      },
+      concept: {
+        en: '<p>Some commands <b>answer</b> with a value. A <b>variable</b> keeps a value under a name that you choose:</p><pre>n = distance()\nprint(n)\nprint(n + 1)</pre><p>The first line asks the radar and keeps the answer in <code>n</code>. After that you can use <code>n</code> wherever a number is expected, for example in <code>range(n)</code>.</p>',
+        de: '<p>Manche Befehle <b>antworten</b> mit einem Wert. Eine <b>Variable</b> merkt sich einen Wert unter einem Namen, den du selbst wählst:</p><pre>n = distance()\nprint(n)\nprint(n + 1)</pre><p>Die erste Zeile fragt das Radar und merkt sich die Antwort in <code>n</code>. Danach kannst du <code>n</code> überall benutzen, wo eine Zahl erwartet wird, zum Beispiel in <code>range(n)</code>.</p>'
+      },
+      hint: {
+        en: 'For one crystal: ask <code>distance()</code>, drive that many fields to the right with a loop, then collect. You need that 3 times, so put a second loop around it. After <code>collect()</code> the radar finds the next crystal.',
+        de: 'Für einen Kristall: <code>distance()</code> fragen, mit einer Schleife so viele Felder nach rechts fahren, dann einsammeln. Das brauchst du 3-mal, also kommt eine zweite Schleife darum. Nach <code>collect()</code> findet das Radar den nächsten Kristall.'
+      },
+      starter: {
+        en: '# The radar answers with a number.\nn = distance()\nprint(n)\n',
+        de: '# Das Radar antwortet mit einer Zahl.\nn = distance()\nprint(n)\n'
+      },
+      api: ['distance', 'var_assign'],
+      stars: [5, 8],
+      random: true,
+      build: function (rnd) {
+        var cells = repeat('.', 11).split(''), placed = 0;
+        while (placed < 3) {
+          var i = between(rnd, 0, cells.length - 1);
+          if (cells[i] === 'S') continue;
+          cells[i] = 'S';
+          placed++;
+        }
+        return [
+          '...#......#.',
+          'R' + cells.join(''),
+          '.#.....#....'
+        ];
+      }
+    },
+    {
+      id: 'code-word',
+      bonus: true,
+      title: { en: 'The code word', de: 'Das Codewort' },
+      story: {
+        en: '<p>The crystal lies behind a gate, and the gate only opens with the right code word. Its five letters are written on plates on the ground, a different word on every run. <code>read()</code> answers with the letter on the rover\'s field.</p><p><b>Mission:</b> Read the five letters, join them into one word, open the gate with <code>unlock()</code> and collect the crystal.</p>',
+        de: '<p>Der Kristall liegt hinter einem Tor, und das Tor öffnet sich nur mit dem richtigen Codewort. Seine fünf Buchstaben stehen auf Platten am Boden, bei jedem Start ein anderes Wort. <code>read()</code> antwortet mit dem Buchstaben auf dem Feld des Rovers.</p><p><b>Mission:</b> Lies die fünf Buchstaben, setze sie zu einem Wort zusammen, öffne das Tor mit <code>unlock()</code> und sammle den Kristall ein.</p>'
+      },
+      concept: {
+        en: '<p>Text in quotation marks is called a <b>string</b>. With <code>+</code> you join two strings:</p><pre>word = "Ma"\nword = word + "rs"\nprint(word)</pre><p>The output is <code>Mars</code>. A string can also be empty: <code>""</code>. That is a good start if you want to add letters one by one.</p>',
+        de: '<p>Text in Anführungszeichen heißt <b>String</b>. Mit <code>+</code> hängst du zwei Strings aneinander:</p><pre>word = "Ma"\nword = word + "rs"\nprint(word)</pre><p>Die Ausgabe ist <code>Mars</code>. Ein String kann auch leer sein: <code>""</code>. Das ist ein guter Anfang, wenn du Buchstaben einzeln anhängen willst.</p>'
+      },
+      hint: {
+        en: 'In a loop over the 5 plates: drive one field to the right and add the letter with <code>code = code + read()</code>. After the loop: <code>unlock(code)</code>, then drive through the gate to the crystal. <code>print(code)</code> shows what you have read so far.',
+        de: 'In einer Schleife über die 5 Platten: ein Feld nach rechts fahren und den Buchstaben mit <code>code = code + read()</code> anhängen. Nach der Schleife: <code>unlock(code)</code>, dann durch das Tor zum Kristall fahren. <code>print(code)</code> zeigt, was du bisher gelesen hast.'
+      },
+      starter: {
+        en: '# Collect the letters in this variable.\ncode = ""\n',
+        de: '# Sammle die Buchstaben in dieser Variablen.\ncode = ""\n'
+      },
+      api: ['read_letter', 'str_plus', 'unlock'],
+      stars: [8, 10],
+      random: true,
+      build: function (rnd) {
+        var words = ['LASER', 'MOTOR', 'RADAR', 'PIXEL', 'SOLAR', 'ORBIT', 'ROBOT', 'SONAR', 'TURBO', 'DELTA', 'OMEGA', 'ALPHA'];
+        return {
+          rows: [
+            '..#...#.',
+            'R?????GS',
+            '....#.#.'
+          ],
+          world: { letters: words[between(rnd, 0, words.length - 1)] }
+        };
+      }
+    },
+    {
       id: 'look-first',
       title: { en: 'Look first', de: 'Erst schauen' },
       story: {
@@ -315,6 +400,57 @@
           '.' + randomRow(rnd, 5, 0.5, 1, 1),
           '......'
         ];
+      }
+    },
+    {
+      id: 'right-or-down',
+      bonus: true,
+      title: { en: 'Right or down?', de: 'Rechts oder runter?' },
+      story: {
+        en: '<p>A field of rubble, different on every run. One rule leads through it: drive to the right whenever that is possible, and <b>otherwise</b> drive down. After exactly 10 fields the rover stands on the crystal.</p><p><b>Mission:</b> Let the rover decide before every step, then collect the crystal.</p>',
+        de: '<p>Ein Geröllfeld, bei jedem Start anders. Eine Regel führt hindurch: Fahre nach rechts, wann immer das geht, und <b>sonst</b> nach unten. Nach genau 10 Feldern steht der Rover auf dem Kristall.</p><p><b>Mission:</b> Lass den Rover vor jedem Schritt entscheiden und sammle dann den Kristall ein.</p>'
+      },
+      concept: {
+        en: '<p><code>else</code> belongs to an <code>if</code> and says what happens when the answer is <code>False</code>:</p><pre>if can_move_right():\n    print("free")\nelse:\n    print("blocked")</pre><p>Exactly one of the two indented parts runs, never both. <code>else:</code> starts at the same position as its <code>if</code> and also ends with a colon. <code>can_move_right()</code> is <code>True</code> if no rock and no edge is in the way on the right.</p>',
+        de: '<p><code>else</code> gehört zu einem <code>if</code> und sagt, was passiert, wenn die Antwort <code>False</code> ist:</p><pre>if can_move_right():\n    print("frei")\nelse:\n    print("versperrt")</pre><p>Es läuft immer genau einer der beiden eingerückten Teile, nie beide. <code>else:</code> beginnt an derselben Stelle wie sein <code>if</code> und endet auch mit einem Doppelpunkt. <code>can_move_right()</code> ist <code>True</code>, wenn rechts kein Felsen und kein Rand im Weg ist.</p>'
+      },
+      hint: {
+        en: 'A loop with 10 rounds. Inside it: <code>if can_move_right():</code> drive right, <code>else:</code> drive down. <code>collect()</code> comes after the loop.',
+        de: 'Eine Schleife mit 10 Runden. Darin: <code>if can_move_right():</code> nach rechts fahren, <code>else:</code> nach unten fahren. <code>collect()</code> kommt nach der Schleife.'
+      },
+      starter: {
+        en: '# Right if possible, otherwise down.\n',
+        de: '# Rechts, wenn es geht, sonst runter.\n'
+      },
+      api: ['can_move', 'else_stmt'],
+      stars: [6, 8],
+      random: true,
+      build: function (rnd) {
+        var cols = 7, rows = 5, x = 0, y = 0, i, grid = [], path = { '0,0': true };
+        // a random way from the top left to the bottom right: 6 steps right and 4 steps down
+        var steps = 'rrrrrrdddd'.split('');
+        for (i = steps.length - 1; i > 0; i--) {
+          var j = between(rnd, 0, i), swap = steps[i];
+          steps[i] = steps[j];
+          steps[j] = swap;
+        }
+        for (i = 0; i < rows; i++) grid.push(repeat('.', cols).split(''));
+        steps.forEach(function (step) {
+          // where the way turns down, a rock closes the field on the right
+          if (step === 'd' && x + 1 < cols) grid[y][x + 1] = '#';
+          if (step === 'r') x++; else y++;
+          path[x + ',' + y] = true;
+        });
+        var extra = 0;
+        while (extra < 4) {
+          var rx = between(rnd, 0, cols - 1), ry = between(rnd, 0, rows - 1);
+          if (path[rx + ',' + ry] || grid[ry][rx] === '#') continue;
+          grid[ry][rx] = '#';
+          extra++;
+        }
+        grid[0][0] = 'R';
+        grid[rows - 1][cols - 1] = 'S';
+        return grid.map(function (row) { return row.join(''); });
       }
     },
     {
@@ -937,6 +1073,114 @@
             if (taken[c + ',' + r]) line += 'S';
             else if (c === 1 && r === 1) line += 'H';
             else if (c === 0 && r === rows - 1) line += 'R';
+            else line += '.';
+          }
+          out.push(line);
+        }
+        return out;
+      }
+    },
+    {
+      id: 'heli-order',
+      track: 'heli',
+      title: { en: 'Coded order', de: 'Verschlüsselter Auftrag' },
+      story: {
+        en: '<p>Ground control knows where the ice is and radios the way there as a short text, for example <code>"3R2D"</code>: 3 fields to the right, then 2 fields down. The text is different on every run, and the camera stays switched off to save power.</p><p>The rover waits for a beacon, as before.</p><p><b>Mission:</b> Read the order with <code>get_order()</code>, fly the route it describes and set the beacon at its end. The battery is just enough for this route.</p>',
+        de: '<p>Die Bodenstation weiß, wo das Eis liegt, und funkt den Weg dorthin als kurzen Text, zum Beispiel <code>"3R2D"</code>: 3 Felder nach rechts, dann 2 Felder nach unten. Der Text ist bei jedem Start anders, und die Kamera bleibt ausgeschaltet, um Strom zu sparen.</p><p>Der Rover wartet wie bisher auf eine Markierung.</p><p><b>Mission:</b> Lies den Auftrag mit <code>get_order()</code>, fliege die Route, die er beschreibt, und setze an ihrem Ende die Markierung. Der Akku reicht gerade für diese Route.</p>'
+      },
+      concept: {
+        en: '<p>A string is a row of characters, and as in a list you reach each one with an index:</p><pre>text = "4R2D"\nprint(text[0])\nprint(len(text))\nprint(int(text[0]) + 1)</pre><p>The output is 4, 4 and 5. <code>text[0]</code> is the <b>text</b> <code>"4"</code>, not a number; <code>int()</code> turns it into the number 4. <code>range(0, 8, 2)</code> counts in steps of two: 0, 2, 4, 6.</p>',
+        de: '<p>Ein String ist eine Reihe von Zeichen, und wie bei einer Liste erreichst du jedes mit einem Index:</p><pre>text = "4R2D"\nprint(text[0])\nprint(len(text))\nprint(int(text[0]) + 1)</pre><p>Die Ausgabe ist 4, 4 und 5. <code>text[0]</code> ist der <b>Text</b> <code>"4"</code>, keine Zahl; <code>int()</code> macht daraus die Zahl 4. <code>range(0, 8, 2)</code> zählt in Zweierschritten: 0, 2, 4, 6.</p>'
+      },
+      hint: {
+        en: 'The order consists of pairs: a digit and a letter. Let <code>i</code> run over the positions 0, 2, 4, ... with <code>range(0, len(order), 2)</code>. Then <code>int(order[i])</code> is the number of flights and <code>order[i + 1]</code> the direction: <code>"R"</code> for right, <code>"D"</code> for down.',
+        de: 'Der Auftrag besteht aus Paaren: eine Ziffer und ein Buchstabe. Lass <code>i</code> mit <code>range(0, len(order), 2)</code> über die Stellen 0, 2, 4, ... laufen. Dann ist <code>int(order[i])</code> die Anzahl der Flüge und <code>order[i + 1]</code> die Richtung: <code>"R"</code> für rechts, <code>"D"</code> für unten.'
+      },
+      starter: {
+        en: '# The order changes on every run.\norder = get_order()\nprint(order)\n',
+        de: '# Der Auftrag ändert sich bei jedem Start.\norder = get_order()\nprint(order)\n'
+      },
+      roverCode: {
+        en: '# Wait for the beacon, drive\n# to it and drill there.\nwait_for_beacon()\nx = beacon_x()\ny = beacon_y()\nfor i in range(x):\n    move_right()\nfor i in range(5 - y):\n    move_up()\ncollect()\n',
+        de: '# Auf die Markierung warten,\n# hinfahren und dort bohren.\nwait_for_beacon()\nx = beacon_x()\ny = beacon_y()\nfor i in range(x):\n    move_right()\nfor i in range(5 - y):\n    move_up()\ncollect()\n'
+      },
+      api: ['get_order', 'str_index', 'int_doc', 'range_step'],
+      world: { goal: 'collect', hidden: true, noPhoto: 'cameraOff' },
+      starMetric: 'battery',
+      stars: function (w) { return [w.info.need, w.info.need]; },
+      random: true,
+      build: function (rnd) {
+        var cols = 9, rows = 6, x = 0, y = 0, order = '', need = 0, out = [];
+        var right = rnd() < 0.5;
+        for (var i = 0; i < 4; i++) {
+          var n = right ? between(rnd, 1, 4) : between(rnd, 1, 2);
+          order += n + (right ? 'R' : 'D');
+          if (right) x += n; else y += n;
+          need += n;
+          right = !right;
+        }
+        for (var r = 0; r < rows; r++) {
+          var line = '';
+          for (var c = 0; c < cols; c++) {
+            if (c === x && r === y) line += 'S';
+            else if (c === 0 && r === 0) line += 'H';
+            else if (c === 0 && r === rows - 1) line += 'R';
+            else line += '.';
+          }
+          out.push(line);
+        }
+        return { rows: out, world: { order: order, battery: need, info: { need: need } } };
+      }
+    },
+    {
+      id: 'heli-bugs',
+      track: 'heli',
+      title: { en: 'Bug hunt', de: 'Fehlersuche' },
+      story: {
+        en: '<p>Three crystals lie in plain sight, and somebody has already written the helicopter\'s program: find the crystals in the photo, fly to each one and set a beacon. Unfortunately it was written in a hurry. It contains <b>three bugs</b>.</p><p>The rover waits for three beacons and then drives to each of them.</p><p><b>Mission:</b> Find and fix the three bugs. Do not rewrite the program: each bug is a small mistake in a single line.</p>',
+        de: '<p>Drei Kristalle liegen gut sichtbar da, und jemand hat das Programm für den Helikopter schon geschrieben: die Kristalle im Foto finden, jeden anfliegen und eine Markierung setzen. Leider wurde es in Eile geschrieben. Es enthält <b>drei Fehler</b>.</p><p>Der Rover wartet auf drei Markierungen und fährt dann zu jeder hin.</p><p><b>Mission:</b> Finde und behebe die drei Fehler. Schreibe das Programm nicht neu: Jeder Fehler ist ein kleiner Irrtum in einer einzigen Zeile.</p>'
+      },
+      concept: {
+        en: '<p>There are three kinds of bugs, and Python helps you with only two of them:</p><p><b>1.</b> Python cannot read the program. Nothing runs at all, and the line is marked.<br><b>2.</b> The program starts, but stops at a line that makes no sense, for example because of a name Python does not know.<br><b>3.</b> The program runs without any message from Python and still does the wrong thing. These are the hardest ones.</p><p>For the third kind, look at the values: <code>print(targets)</code> shows what is really in a list, and <b>Step</b> shows what happens in each tick.</p>',
+        de: '<p>Es gibt drei Arten von Fehlern, und nur bei zweien hilft dir Python:</p><p><b>1.</b> Python kann das Programm nicht lesen. Es läuft gar nichts, und die Zeile wird markiert.<br><b>2.</b> Das Programm startet, bleibt aber an einer Zeile stehen, die keinen Sinn ergibt, zum Beispiel wegen eines Namens, den Python nicht kennt.<br><b>3.</b> Das Programm läuft ohne Meldung von Python und macht trotzdem das Falsche. Das sind die schwierigsten.</p><p>Bei der dritten Art hilft es, sich die Werte anzusehen: <code>print(targets)</code> zeigt, was wirklich in einer Liste steht, und <b>Schritt</b> zeigt, was in jedem Tick passiert.</p>'
+      },
+      hint: {
+        en: 'First fix what Python reports, one message at a time. When no message is left, compare: where are the crystals, and where does the helicopter set its beacons? The numbers at the edge of the map help. Which of the two numbers of a target is the column?',
+        de: 'Behebe zuerst, was Python meldet, eine Meldung nach der anderen. Wenn keine Meldung mehr kommt, vergleiche: Wo liegen die Kristalle, und wo setzt der Helikopter seine Markierungen? Die Zahlen am Kartenrand helfen. Welche der beiden Zahlen eines Ziels ist die Spalte?'
+      },
+      starter: {
+        en: '# This program should set a beacon on every crystal.\n# It contains three bugs. Find and fix them!\ndef fly_to(x, y):\n    while get_x() < x:\n        fly_right()\n    while get_x() > x:\n        fly_left()\n    while get_y() < y:\n        fly_down()\n    while get_y() > y:\n        fly_up()\n\nphoto = take_photo()\ntargets = []\nfor y in range(len(photo)):\n    for x in range(len(photo[y])):\n        if photo[y][x] == "ice":\n            target.append([x, y])\n\nfor t in targets\n    fly_to(t[1], t[0])\n    mark()\n',
+        de: '# Dieses Programm soll auf jeden Kristall eine Markierung setzen.\n# Es enthält drei Fehler. Finde und behebe sie!\ndef fly_to(x, y):\n    while get_x() < x:\n        fly_right()\n    while get_x() > x:\n        fly_left()\n    while get_y() < y:\n        fly_down()\n    while get_y() > y:\n        fly_up()\n\nphoto = take_photo()\ntargets = []\nfor y in range(len(photo)):\n    for x in range(len(photo[y])):\n        if photo[y][x] == "ice":\n            target.append([x, y])\n\nfor t in targets\n    fly_to(t[1], t[0])\n    mark()\n'
+      },
+      roverCode: {
+        en: '# Wait for 3 beacons, then\n# drive to each and drill.\ntargets = wait_for_beacons(3)\nfor t in targets:\n    drive_to(t[0], t[1])\n    collect()\n',
+        de: '# 3 Markierungen abwarten,\n# hinfahren und bohren.\ntargets = wait_for_beacons(3)\nfor t in targets:\n    drive_to(t[0], t[1])\n    collect()\n'
+      },
+      api: [],
+      world: { goal: 'collect', beacons: 3, battery: 40 },
+      stars: null,
+      finished: {
+        en: 'All three bugs are fixed. Finding the mistake in a program that almost works is what programmers do most of the time.',
+        de: 'Alle drei Fehler sind behoben. Den Fehler in einem Programm zu finden, das fast funktioniert, ist das, was Programmierer die meiste Zeit tun.'
+      },
+      random: true,
+      build: function (rnd) {
+        var size = 7, taken = {}, placed = 0, out = [];
+        while (placed < 3) {
+          var x = between(rnd, 0, size - 1), y = between(rnd, 0, size - 1);
+          // never on the diagonal and never mirrored onto another crystal: swapped coordinates always show
+          if (x === y || taken[x + ',' + y] || taken[y + ',' + x]) continue;
+          // not where the rover starts, and not where its mirror image is
+          if ((x === 0 && y === size - 1) || (x === size - 1 && y === 0)) continue;
+          taken[x + ',' + y] = true;
+          placed++;
+        }
+        for (var r = 0; r < size; r++) {
+          var line = '';
+          for (var c = 0; c < size; c++) {
+            if (taken[c + ',' + r]) line += 'S';
+            else if (c === 0 && r === 0) line += 'H';
+            else if (c === 0 && r === size - 1) line += 'R';
             else line += '.';
           }
           out.push(line);

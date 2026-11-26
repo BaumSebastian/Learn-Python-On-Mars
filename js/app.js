@@ -84,10 +84,13 @@
     return list;
   }
 
+  /* Regular missions are numbered 1, 2, 3 ...; bonus missions count on their own: B1, B2 ... */
   function levelLabel(index) {
-    var track = trackOf(LEVELS[index]);
-    var pos = trackLevels(track).indexOf(index) + 1;
-    return track === 'heli' ? 'H' + pos : String(pos);
+    var lv = LEVELS[index], track = trackOf(lv), n = 0;
+    trackLevels(track).forEach(function (i) {
+      if (i <= index && !!LEVELS[i].bonus === !!lv.bonus) n++;
+    });
+    return (track === 'heli' ? 'H' : '') + (lv.bonus ? 'B' : '') + n;
   }
 
   /* ---------- game, runner, editors ---------- */
@@ -162,7 +165,7 @@
   /* ---------- autocomplete ---------- */
 
   var KEYWORDS = ['for', 'in', 'range()', 'if', 'else:', 'elif', 'while', 'def', 'not', 'and', 'or',
-    'True', 'False', 'return', 'print()', 'len()', 'abs()', 'append()', 'remove()'];
+    'True', 'False', 'return', 'print()', 'len()', 'abs()', 'append()', 'remove()', 'int()', 'str()'];
   var HINTS_BY_DOC = {
     move_right: ['move_right()'], move_left: ['move_left()'], move_up: ['move_up()'], move_down: ['move_down()'],
     collect: ['collect()'], is_sample: ['is_sample()'], scan: ['scan()'],
@@ -171,14 +174,17 @@
     fly: ['fly_right()', 'fly_left()', 'fly_up()', 'fly_down()'],
     drop: ['drop()'], wait: ['wait()'], battery: ['battery()'],
     take_photo: ['take_photo()'], mark: ['mark()'], heli_pos: ['get_x()', 'get_y()'],
-    get_plan: ['get_plan()'], send: ['send()'], take_thermal: ['take_thermal()'], small_photo: ['take_photo()']
+    get_plan: ['get_plan()'], send: ['send()'], take_thermal: ['take_thermal()'], small_photo: ['take_photo()'],
+    distance: ['distance()'], read_letter: ['read()'], unlock: ['unlock()'], get_order: ['get_order()']
   };
 
   /* Commands introduced up to the current mission, within its track. */
   function unlockedDocs() {
     var keys = [], list = trackLevels(trackOf(level()));
     for (var i = 0; i < list.length && list[i] <= levelIndex; i++) {
-      keys = keys.concat(LEVELS[list[i]].api || []);
+      (LEVELS[list[i]].api || []).forEach(function (key) {
+        if (keys.indexOf(key) === -1) keys.push(key); // a bonus mission may introduce a command early
+      });
     }
     return keys;
   }
@@ -373,7 +379,7 @@
       var lv = LEVELS[i], p = progress[lv.id] || {};
       var btn = document.createElement('button');
       btn.type = 'button';
-      btn.className = 'level-btn' + (i === levelIndex ? ' current' : '') + (p.done ? ' done' : '');
+      btn.className = 'level-btn' + (i === levelIndex ? ' current' : '') + (p.done ? ' done' : '') + (lv.bonus ? ' bonus' : '');
       btn.title = levelLabel(i) + '. ' + L(lv.title);
       var mini;
       if (lv.stars) {
@@ -395,8 +401,9 @@
 
   function renderTask() {
     var lv = level(), p = progress[lv.id] || {};
-    var count = trackLevels(trackOf(lv)).length;
-    $('taskNum').textContent = t('mission') + ' ' + levelLabel(levelIndex) + ' / ' + count;
+    var count = trackLevels(trackOf(lv)).filter(function (i) { return !LEVELS[i].bonus; }).length;
+    $('taskNum').textContent = lv.bonus ? t('bonus') + ' ' + levelLabel(levelIndex)
+      : t('mission') + ' ' + levelLabel(levelIndex) + ' / ' + count;
     $('taskTitle').textContent = L(lv.title);
     $('taskStars').innerHTML = lv.stars ? starsHtml(p.stars || 0) : '';
     $('taskStory').innerHTML = L(lv.story);
@@ -630,10 +637,22 @@
 
   /* ---------- success overlay ---------- */
 
+  /* The mission after this one. Coming from a regular mission, bonus missions are skipped. */
   function nextInTrack() {
     var list = trackLevels(trackOf(level()));
     var pos = list.indexOf(levelIndex);
-    return (pos !== -1 && pos < list.length - 1) ? list[pos + 1] : -1;
+    for (var i = pos + 1; pos !== -1 && i < list.length; i++) {
+      if (level().bonus || !LEVELS[list[i]].bonus) return list[i];
+    }
+    return -1;
+  }
+
+  /* The bonus mission that comes right after this regular mission, or -1. */
+  function bonusNext() {
+    var list = trackLevels(trackOf(level()));
+    var pos = list.indexOf(levelIndex);
+    var next = (pos !== -1 && pos < list.length - 1) ? list[pos + 1] : -1;
+    return (next !== -1 && !level().bonus && LEVELS[next].bonus) ? next : -1;
   }
 
   function showOverlay(lv, value, stars) {
@@ -642,13 +661,15 @@
     $('ovStars').innerHTML = lv.stars ? starsHtml(stars) : '';
     $('ovLines').textContent = lv.stars ? t(battery ? 'successBattery' : 'successLines', { n: value }) : '';
     var info;
-    if (!lv.stars) info = t('successSandbox');
+    if (!lv.stars) info = lv.finished ? L(lv.finished) : t('successSandbox');
     else if (stars === 3) info = t(battery ? 'successBestBattery' : 'successBest');
     else info = t(battery ? 'successMoreBattery' : 'successMore', { n: starLimits(lv)[0] });
     if (last) info += ' ' + t(trackOf(lv) === 'heli' ? 'allDoneHeli' : 'allDone');
     $('ovInfo').textContent = info;
     $('ovNext').textContent = t('next') + ' ▶';
     $('ovNext').hidden = last;
+    $('ovBonus').textContent = t('bonusNext');
+    $('ovBonus').hidden = bonusNext() === -1;
     $('ovStay').textContent = t('improve');
     $('overlay').hidden = false;
   }
@@ -690,6 +711,10 @@
   });
   $('ovNext').addEventListener('click', function () {
     var next = nextInTrack();
+    if (next !== -1) loadLevel(next);
+  });
+  $('ovBonus').addEventListener('click', function () {
+    var next = bonusNext();
     if (next !== -1) loadLevel(next);
   });
   $('ovStay').addEventListener('click', function () {

@@ -87,7 +87,13 @@ window.I18N = {
     errIndentationError: 'The indentation is wrong. Lines that belong to for, if, while or def start with 4 more spaces, and lines that belong together start at the same position.',
     errTypeError: 'Something does not fit together here. Did you put a value into the brackets of a command that takes none, or forget one?',
     errZeroDivisionError: 'You cannot divide by zero.',
-    errGeneric: 'Python has stopped with an error. Read the message below, it often names the problem quite precisely.'
+    errGeneric: 'Python has stopped with an error. Read the message below, it often names the problem quite precisely.',
+    bonus: 'Bonus',
+    bonusNext: 'Bonus mission',
+    crashGate: 'The gate is closed. It only opens with the right code word: unlock(code).',
+    wrongCode: 'The gate stays closed: "{code}" is not the code word.',
+    noGate: 'There is no gate in this mission, so unlock() cannot be used here.',
+    cameraOff: 'The camera is switched off in this mission. get_order() tells you the way.'
   },
   de: {
     appTitle: 'Python lernen auf dem Mars',
@@ -176,6 +182,12 @@ window.I18N = {
     errIndentationError: 'Die Einrückung stimmt nicht. Zeilen, die zu for, if, while oder def gehören, beginnen mit 4 Leerzeichen mehr, und zusammengehörige Zeilen beginnen an derselben Stelle.',
     errTypeError: 'Hier passt etwas nicht zusammen. Hast du einen Wert in die Klammern eines Befehls geschrieben, der keinen braucht, oder einen vergessen?',
     errZeroDivisionError: 'Durch null kann man nicht teilen.',
-    errGeneric: 'Python hat mit einem Fehler angehalten. Lies die Meldung darunter, sie benennt das Problem oft recht genau.'
+    errGeneric: 'Python hat mit einem Fehler angehalten. Lies die Meldung darunter, sie benennt das Problem oft recht genau.',
+    bonus: 'Bonus',
+    bonusNext: 'Bonus-Mission',
+    crashGate: 'Das Tor ist geschlossen. Es öffnet sich nur mit dem richtigen Codewort: unlock(code).',
+    wrongCode: 'Das Tor bleibt zu: "{code}" ist nicht das Codewort.',
+    noGate: 'In dieser Mission gibt es kein Tor, deshalb kann unlock() hier nicht benutzt werden.',
+    cameraOff: 'Die Kamera ist in dieser Mission ausgeschaltet. Den Weg verrät dir get_order().'
   }
 };
