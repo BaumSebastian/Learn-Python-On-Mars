@@ -69,7 +69,7 @@
   Game.prototype.load = function (rows, opts) {
     opts = opts || {};
     var cols = 0, y, x;
-    // Bonus missions: ? is a plate with a letter (taken from opts.letters in reading order), G is a gate
+    // ? is a plate with a letter (taken from opts.letters in reading order), G is a gate
     // that unlock() opens with opts.code (by default the letters), opts.order is the text for get_order().
     var letters = opts.letters || '', letterCount = 0;
     for (y = 0; y < rows.length; y++) cols = Math.max(cols, rows[y].length);
@@ -431,7 +431,7 @@
       ctx.stroke();
     }
 
-    // letter plates and the gate (bonus missions)
+    // letter plates and the gate
     for (y = 0; y < w.rows; y++) {
       for (x = 0; x < w.cols; x++) {
         if (w.cells[y][x].letter) drawPlate(ctx, x * s + s / 2, y * s + s / 2, s, w.cells[y][x].letter);

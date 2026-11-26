@@ -4,8 +4,7 @@
  * build(rnd) returns the rows of the map; rnd() gives a random number 0..1.
  * stars: [most lines for 3 stars, most lines for 2 stars]
  * api: commands that appear in the command list from this mission on.
- * bonus: true marks an optional mission. It gets its own number (B1, B2 ...) and "Next mission" skips it.
- * Bonus missions use two more map characters:  ? plate with a letter   G gate
+ * Two more map characters, used by "The code word":  ? plate with a letter   G gate
  */
 (function () {
   'use strict';
@@ -273,7 +272,6 @@
     },
     {
       id: 'how-far',
-      bonus: true,
       title: { en: 'How far?', de: 'Wie weit?' },
       story: {
         en: '<p>Three crystals lie in this row, in different places on every run. Counting fields on the map does not help any more. But the rover has a radar: <code>distance()</code> answers with a number, the number of fields to the next crystal on its right.</p><p><b>Mission:</b> Collect all three crystals. Ask the radar how far to drive, and keep the answer in a variable.</p>',
@@ -311,7 +309,6 @@
     },
     {
       id: 'code-word',
-      bonus: true,
       title: { en: 'The code word', de: 'Das Codewort' },
       story: {
         en: '<p>The crystal lies behind a gate, and the gate only opens with the right code word. Its five letters are written on plates on the ground, a different word on every run. <code>read()</code> answers with the letter on the rover\'s field.</p><p><b>Mission:</b> Read the five letters, join them into one word, open the gate with <code>unlock()</code> and collect the crystal.</p>',
@@ -404,7 +401,6 @@
     },
     {
       id: 'right-or-down',
-      bonus: true,
       title: { en: 'Right or down?', de: 'Rechts oder runter?' },
       story: {
         en: '<p>A field of rubble, different on every run. One rule leads through it: drive to the right whenever that is possible, and <b>otherwise</b> drive down. After exactly 10 fields the rover stands on the crystal.</p><p><b>Mission:</b> Let the rover decide before every step, then collect the crystal.</p>',
@@ -472,7 +468,7 @@
         en: '# How long is the trench? It changes on every run.\n',
         de: '# Wie lang ist der Graben? Das ändert sich bei jedem Start.\n'
       },
-      api: ['can_move', 'while_loop'],
+      api: ['while_loop'],
       stars: [4, 6],
       random: true,
       build: function (rnd) {

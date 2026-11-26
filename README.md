@@ -21,7 +21,7 @@ For the classroom there is also an offline version: no installation, no accounts
 
 ### Rover track: the basics
 
-Fifteen short missions, each adding one idea. Designed for about three hours with students who have never programmed.
+Eighteen short missions, each adding one idea. Designed for about three hours with students who have never programmed.
 
 ![A loop drives the rover across the map](docs/images/loop.png)
 
@@ -30,22 +30,17 @@ Fifteen short missions, each adding one idea. Designed for about three hours wit
 | 1–2 | First contact, Around the rocks | Commands in sequence |
 | 3–6 | The long road … Around the corner | `for` loops |
 | 7 | The big field | Loops inside loops |
-| 8–9 | Look first, After the storm | `if` with a sensor |
-| 10–11 | Into the unknown, The canyon | `while` |
-| 12 | Your own commands | `def` |
-| 13 | Ice or stone? | A value in the brackets: `is_sample("ice")` |
-| 14 | The pyramid | Loop variable, `range(1, 6)`, `print()` |
-| 15 | Free exploration | Variables, open-ended |
+| 8 | How far? | A command that answers with a value, and a variable to keep it: `n = distance()` |
+| 9 | The code word | Strings: joining letters with `+` |
+| 10–11 | Look first, After the storm | `if` with a sensor |
+| 12 | Right or down? | `else` |
+| 13–14 | Into the unknown, The canyon | `while` |
+| 15 | Your own commands | `def` |
+| 16 | Ice or stone? | A value in the brackets: `is_sample("ice")` |
+| 17 | The pyramid | Loop variable, `range(1, 6)`, `print()` |
+| 18 | Free exploration | Variables, open-ended |
 
 From mission 8 on the field changes on every run, so a route cannot simply be written down once.
-
-Three **bonus missions** sit between them for students who are faster than the rest. They are optional: **Next mission** skips them, and they have their own numbers in the mission bar.
-
-| # | Mission | New idea |
-|---|---------|----------|
-| B1 | How far? | A command that answers with a value, and a variable to keep it: `n = distance()` |
-| B2 | The code word | Strings: joining letters with `+` |
-| B3 | Right or down? | `else` |
 
 ### Helicopter track: for students who already program
 
